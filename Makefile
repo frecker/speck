@@ -1,2 +1,2 @@
 speck:*.hs
-	ghc --make -O3 -o speck Speck.hs
+	ghc --make -o speck Speck.hs
