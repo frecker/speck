@@ -21,13 +21,21 @@ main
 ctr_file_encrypt f g = do
   (key_1,key_0) <- gen_key
   print_keys key_1 key_0
-  xs <- B.readFile f
-  B.writeFile g $ B.pack $ ctr_encrypt [key_1,key_0] $ B.unpack xs
+  in_handle <- openBinaryFile f ReadMode
+  out_handle <- openBinaryFile g WriteMode
+  xs <- B.hGetContents in_handle
+  B.hPut out_handle $ B.pack $ ctr_encrypt [key_1,key_0] $ B.unpack xs
+  hClose out_handle
+  hClose in_handle
 
 ctr_file_decrypt f g = do
   (key_1,key_0) <- read_keys
-  xs <- B.readFile f
-  B.writeFile g $ B.pack $ ctr_decrypt [key_1,key_0] $ B.unpack xs
+  in_handle <- openBinaryFile f ReadMode
+  out_handle <- openBinaryFile g WriteMode
+  xs <- B.hGetContents in_handle
+  B.hPut out_handle $ B.pack $ ctr_decrypt [key_1,key_0] $ B.unpack xs
+  hClose out_handle
+  hClose in_handle
 
 print_keys k1 k0 =
   putStrLn $ num_to_hex_string k1 ++ " " ++ num_to_hex_string k0
