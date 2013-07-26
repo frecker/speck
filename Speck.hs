@@ -21,19 +21,17 @@ main
 ctr_file_encrypt f g = do
   (key_1,key_0) <- gen_key
   print_keys key_1 key_0
+  ctr_process_file key_1 key_0 f g
+
+ctr_file_decrypt f g = do
+  (key_1,key_0) <- read_keys
+  ctr_process_file key_1 key_0 f g
+
+ctr_process_file key_1 key_0 f g = do
   in_handle <- openBinaryFile f ReadMode
   out_handle <- openBinaryFile g WriteMode
   xs <- B.hGetContents in_handle
   B.hPut out_handle $ B.pack $ ctr_encrypt key_1 key_0 $ B.unpack xs
-  hClose out_handle
-  hClose in_handle
-
-ctr_file_decrypt f g = do
-  (key_1,key_0) <- read_keys
-  in_handle <- openBinaryFile f ReadMode
-  out_handle <- openBinaryFile g WriteMode
-  xs <- B.hGetContents in_handle
-  B.hPut out_handle $ B.pack $ ctr_decrypt key_1 key_0 $ B.unpack xs
   hClose out_handle
   hClose in_handle
 
@@ -68,12 +66,10 @@ random_word64 g =
     o = maxBound
 
 ---- Real World encryption and decryption
+-- encryption and decryption is the same operation in counter mode
 ctr_encrypt :: Word64 -> Word64 -> [Word8] -> [Word8]
 ctr_encrypt l0 k0 xs =
   zipWith xor xs (ctr_stream l0 k0)
-
-ctr_decrypt :: Word64 -> Word64 -> [Word8] -> [Word8]
-ctr_decrypt = ctr_encrypt
 
 ctr_stream :: Word64 -> Word64 -> [Word8]
 ctr_stream l0 k0 =
@@ -131,6 +127,7 @@ encryption (k:ks) x y =
 encryption [] x y = (x,y)
 
 -- round_keys are in order T-1..0
+-- in fact, this function is not used in counter-mode but provided anyway
 decryption :: [Word64] -> Word64 -> Word64 -> (Word64,Word64)
 decryption (k:ks) x y =
   decryption ks x_new y_new
