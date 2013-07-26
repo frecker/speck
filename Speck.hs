@@ -52,13 +52,13 @@ read_keys = do
 gen_key :: IO (Word64,Word64)
 gen_key = do
   g <- getStdGen
-  let (x,g') = zuf_word64 g
-  let (y,g'') = zuf_word64 g'
+  let (x,g') = random_word64 g
+  let (y,g'') = random_word64 g'
   setStdGen g''
   return (x,y)
 
-zuf_word64 :: RandomGen g => g -> (Word64,g)
-zuf_word64 g =
+random_word64 :: RandomGen g => g -> (Word64,g)
+random_word64 g =
   (fromIntegral x,g')
   where
     x :: Integer
